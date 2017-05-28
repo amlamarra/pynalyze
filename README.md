@@ -1,2 +1,2 @@
 # pynalyze
-A URL analyzer
+An analyzer to see if a URL is malicious
