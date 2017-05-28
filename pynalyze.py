@@ -2,8 +2,17 @@
 """ pynalyze is a URL analyzer
 AUTHOR: Andrew Lamarra
 """
+
 import validators
 import argparse
+
+
+def validate(url):
+    print("\nValidating {}".format(url))
+    if validators.url(url):
+        return True
+    else:
+        return False
 
 
 if __name__ == "__main__":
@@ -25,8 +34,3 @@ if __name__ == "__main__":
         print("This only accepts either the HTTP or HTTPS protocol")
 
     # Validate that it IS a URL
-    print("\nValidating {}".format(url))
-    if validators.url(url):
-        print("Valid URL")
-    else:
-        print("Invalid URL")
