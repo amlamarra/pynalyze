@@ -5,6 +5,7 @@ AUTHOR: Andrew Lamarra
 
 import validators
 import argparse
+import requests
 
 
 def validate(url):
@@ -46,6 +47,13 @@ if __name__ == "__main__":
 
     # Validate that it IS a URL
     if validate(url):
-        print("Good URL")
+        print("Good URL\n")
     else:
-        print("Bad URL")
+        print("Bad URL\n")
+
+    # Requests test
+    print("Performing a Requests test\n")
+    r = requests.get("https://lamarranet.com")
+    print(r.text)
+    print()
+    print(r.json)
