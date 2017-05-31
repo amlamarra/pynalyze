@@ -3,8 +3,9 @@
 AUTHOR: Andrew Lamarra
 """
 
-import validators
+import sys
 import argparse
+import validators
 import requests
 
 
@@ -19,6 +20,22 @@ def validate(url):
         return True
     else:
         return False
+
+
+def testuri(url):
+    """ Uses testuri.org to get the contents of a page.
+    ACCEPTS: 1 string (the URL)
+    RETURNS:
+    """
+
+    payload = {"url": url, "http": "1.1", "agent": "2"}
+    r = requests.post("http://testuri.org/sniffer", data=payload)
+
+    if r.status_code == requests.codes.ok:
+        print("Something went wrong with the testuri.org request")
+    else:
+        print(r.text + "\n")
+        r.raise_for_status()
 
 
 if __name__ == "__main__":
@@ -50,10 +67,10 @@ if __name__ == "__main__":
         print("Good URL\n")
     else:
         print("Bad URL\n")
+        sys.exit()
 
     # Requests test
     print("Performing a Requests test\n")
-    r = requests.get("https://lamarranet.com")
-    print(r.text)
-    print()
-    print(r.json)
+    # r = requests.get("https://lamarranet.com")
+    # print(r.text)
+    testuri(url)
