@@ -9,6 +9,39 @@ import validators
 import requests
 
 
+def menu():
+    print("1) Set/change URL")
+    print("2) Preferences")
+    print("3) Manage API Keys")
+    print("4) Analysis")
+    print("5) Exit")
+    print()
+    return input(">>> ")
+
+
+def set_url():
+    url = input("Enter a URL to analyze: ")
+
+    # Add the protocol if not supplied
+    if "://" not in url:
+        url = "http://" + url
+        protocol = "http"
+    else:
+        protocol = url.split("://")[0]
+
+    # Only accept HTTP and HTTPS
+    if protocol != "http" and protocol != "https":
+        print("This only accepts either the HTTP or HTTPS protocol")
+        sys.exit()
+
+    # Validate that it IS a URL
+    if validate(url):
+        print("Good URL\n")
+    else:
+        print("Bad URL\n")
+        sys.exit()
+
+
 def validate(url):
     """ Ensures that the provided URL is a valid URL
     ACCEPTS: 1 string (the URL)
@@ -44,33 +77,19 @@ if __name__ == "__main__":
     parser.add_argument("URL", nargs="?", help="Provide the URL")
     args = parser.parse_args()
 
-    # Prompt the user for the URL if one was not supplied
+    # Save the URL if one was supplied
     if args.URL:
         url = args.URL
     else:
-        url = input("Enter a URL to analyze: ")
+        url = ""
 
-    # Add the protocol if not supplied
-    if "://" not in url:
-        url = "http://" + url
-        protocol = "http"
-    else:
-        protocol = url.split("://")[0]
-
-    # Only accept HTTP and HTTPS
-    if protocol != "http" and protocol != "https":
-        print("This only accepts either the HTTP or HTTPS protocol")
-        # Exit program
-
-    # Validate that it IS a URL
-    if validate(url):
-        print("Good URL\n")
-    else:
-        print("Bad URL\n")
-        sys.exit()
-
-    # Requests test
-    print("Performing a Requests test\n")
-    # r = requests.get("https://lamarranet.com")
-    # print(r.text)
-    testuri(url)
+    while True:
+        choice = menu()
+        print()
+        if choice == "exit" or choice == "5":
+            # sys.exit()
+            break
+        elif choice == "1":
+            url = set_url()
+        else:
+            print("Invalid selection\n")
