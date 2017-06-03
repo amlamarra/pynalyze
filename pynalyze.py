@@ -6,28 +6,40 @@ AUTHOR: Andrew Lamarra
 import sys
 import argparse
 import validators
-import requests
+from modules import analysis
+
+
+URL = [""]
 
 
 def menu():
+    print("MAIN MENU\n")
+    print("   URL to analyze: {}\n".format(URL[0]))
     print("1) Set/change URL")
     print("2) Preferences")
     print("3) Manage API Keys")
     print("4) Analysis")
-    print("5) Exit")
-    print()
+    print("5) Exit\n")
+    return input(">>> ")
+
+
+def menu_analysis():
+    print("  ANALYSIS MENU\n")
+    print("     URL to analyze: {}\n".format(URL[0]))
+    print("  1) Get page source")
+    print("  2) Back to main menu\n")
     return input(">>> ")
 
 
 def set_url():
-    url = input("Enter a URL to analyze: ")
+    URL[0] = input("Enter a URL to analyze: ")
 
     # Add the protocol if not supplied
-    if "://" not in url:
-        url = "http://" + url
+    if "://" not in URL[0]:
+        URL[0] = "http://" + URL[0]
         protocol = "http"
     else:
-        protocol = url.split("://")[0]
+        protocol = URL[0].split("://")[0]
 
     # Only accept HTTP and HTTPS
     if protocol != "http" and protocol != "https":
@@ -35,7 +47,7 @@ def set_url():
         sys.exit()
 
     # Validate that it IS a URL
-    if validate(url):
+    if validate(URL[0]):
         print("Good URL\n")
     else:
         print("Bad URL\n")
@@ -53,22 +65,6 @@ def validate(url):
         return True
     else:
         return False
-
-
-def testuri(url):
-    """ Uses testuri.org to get the contents of a page.
-    ACCEPTS: 1 string (the URL)
-    RETURNS:
-    """
-
-    payload = {"url": url, "http": "1.1", "agent": "2"}
-    r = requests.post("http://testuri.org/sniffer", data=payload)
-
-    if r.status_code == requests.codes.ok:
-        print("Something went wrong with the testuri.org request")
-    else:
-        print(r.text + "\n")
-        r.raise_for_status()
 
 
 if __name__ == "__main__":
@@ -91,5 +87,12 @@ if __name__ == "__main__":
             break
         elif choice == "1":
             url = set_url()
+        elif choice == "4":
+            while True:
+                choice2 = menu_analysis()
+                if choice2 == "1":
+                    analysis.testuri(url)
+                elif choice2 == "back" or choice2 == "2":
+                    break
         else:
             print("Invalid selection\n")
