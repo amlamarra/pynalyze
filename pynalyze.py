@@ -75,9 +75,9 @@ if __name__ == "__main__":
 
     # Save the URL if one was supplied
     if args.URL:
-        url = args.URL
+        URL[0] = args.URL
     else:
-        url = ""
+        URL[0] = ""
 
     while True:
         choice = menu()
@@ -86,12 +86,15 @@ if __name__ == "__main__":
             # sys.exit()
             break
         elif choice == "1":
-            url = set_url()
+            set_url()
         elif choice == "4":
             while True:
                 choice2 = menu_analysis()
                 if choice2 == "1":
-                    analysis.testuri(url)
+                    if URL[0] == "":
+                        print("The URL hasn't been set yet")
+                    else:
+                        analysis.testuri(URL[0])
                 elif choice2 == "back" or choice2 == "2":
                     break
         else:
