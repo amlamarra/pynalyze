@@ -3,7 +3,6 @@
 AUTHOR: Andrew Lamarra
 """
 
-import sys
 import argparse
 import validators
 from modules import analysis
@@ -12,46 +11,29 @@ from modules import analysis
 URL = [""]
 
 
-def menu():
-    print("MAIN MENU\n")
-    print("   URL to analyze: {}\n".format(URL[0]))
-    print("1) Set/change URL")
-    print("2) Preferences")
-    print("3) Manage API Keys")
-    print("4) Analysis")
-    print("5) Exit\n")
-    return input(">>> ")
-
-
-def menu_analysis():
-    print("  ANALYSIS MENU\n")
-    print("     URL to analyze: {}\n".format(URL[0]))
-    print("  1) Get page source")
-    print("  2) Back to main menu\n")
-    return input(">>> ")
-
-
 def set_url():
-    URL[0] = input("Enter a URL to analyze: ")
+    while True:
+        URL[0] = input("Enter a URL to analyze: ")
 
-    # Add the protocol if not supplied
-    if "://" not in URL[0]:
-        URL[0] = "http://" + URL[0]
-        protocol = "http"
-    else:
-        protocol = URL[0].split("://")[0]
+        # Add the protocol if not supplied
+        if "://" not in URL[0]:
+            URL[0] = "http://" + URL[0]
+            protocol = "http"
+        else:
+            protocol = URL[0].split("://")[0]
 
-    # Only accept HTTP and HTTPS
-    if protocol != "http" and protocol != "https":
-        print("This only accepts either the HTTP or HTTPS protocol")
-        sys.exit()
+        # Only accept HTTP and HTTPS
+        if protocol != "http" and protocol != "https":
+            print("This only accepts either the HTTP or HTTPS protocol\n")
+        else:
+            break
 
     # Validate that it IS a URL
     if validate(URL[0]):
         print("Good URL\n")
     else:
         print("Bad URL\n")
-        sys.exit()
+        raise SystemExit
 
 
 def validate(url):
@@ -67,6 +49,49 @@ def validate(url):
         return False
 
 
+def menu_analysis():
+    while True:
+        print("  ANALYSIS MENU\n")
+        print("     URL to analyze: {}\n".format(URL[0]))
+        print("  1) Get page source")
+        print("  2) Back to main menu")
+        print("  3) Exit\n")
+        ans = input(">>> ")
+
+        if ans == "1":
+            if URL[0] == "":
+                print("The URL hasn't been set yet")
+            else:
+                analysis.testuri(URL[0])
+        elif ans == "back" or ans == "2":
+            break
+        elif ans == "exit" or ans == "3":
+            raise SystemExit
+        else:
+            print("Invalid selection\n")
+
+
+def menu_main():
+    while True:
+        print("MAIN MENU\n")
+        print("   URL to analyze: {}\n".format(URL[0]))
+        print("1) Set/change URL")
+        print("2) Preferences")
+        print("3) Manage API Keys")
+        print("4) Analysis")
+        print("5) Exit\n")
+        ans = input(">>> ")
+
+        if ans == "exit" or ans == "5":
+            raise SystemExit
+        elif ans == "1":
+            set_url()
+        elif ans == "4":
+            menu_analysis()
+        else:
+            print("Invalid selection\n")
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Checks if a URL is malicious")
@@ -79,23 +104,4 @@ if __name__ == "__main__":
     else:
         URL[0] = ""
 
-    while True:
-        choice = menu()
-        print()
-        if choice == "exit" or choice == "5":
-            # sys.exit()
-            break
-        elif choice == "1":
-            set_url()
-        elif choice == "4":
-            while True:
-                choice2 = menu_analysis()
-                if choice2 == "1":
-                    if URL[0] == "":
-                        print("The URL hasn't been set yet")
-                    else:
-                        analysis.testuri(URL[0])
-                elif choice2 == "back" or choice2 == "2":
-                    break
-        else:
-            print("Invalid selection\n")
+    menu_main()
