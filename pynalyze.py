@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-""" pynalyze is a URL analyzer
+""" pynalyze attempts to determine if a URL is malicious or not
 AUTHOR: Andrew Lamarra
 """
 
+import os
 import argparse
 import validators
 from modules import analysis
@@ -49,23 +50,47 @@ def validate(url):
         return False
 
 
+def menu_preferences():
+    while True:
+        print("PREFERENCES MENU\n")
+        print("1) Restore last saved URL upon starting Pynalyze")
+        print("   (currently = False)")
+        print("2) Set default URL protocol when not specified")
+        print("   (currently = HTTP)")
+        print("3) Automatically follow redirects when getting the page source")
+        print("   Each URL in the redirect will still be displayed to you.")
+        print("   (currently = False)")
+        print("4) Back to main menu")
+        print("5) Exit\n")
+        ans = input(">>> ")
+        print()
+
+        if ans.lower() == "back" or ans == "4":
+            break
+        elif ans.lower() == "exit" or ans == "5":
+            raise SystemExit
+        else:
+            print("Invalid Selection\n")
+
+
 def menu_analysis():
     while True:
-        print("  ANALYSIS MENU\n")
-        print("     URL to analyze: {}\n".format(URL[0]))
-        print("  1) Get page source")
-        print("  2) Back to main menu")
-        print("  3) Exit\n")
+        print("ANALYSIS MENU\n")
+        print("   URL to analyze: {}\n".format(URL[0]))
+        print("1) Get page source")
+        print("2) Back to main menu")
+        print("3) Exit\n")
         ans = input(">>> ")
+        print()
 
         if ans == "1":
             if URL[0] == "":
                 print("The URL hasn't been set yet")
             else:
                 analysis.testuri(URL[0])
-        elif ans == "back" or ans == "2":
+        elif ans.lower() == "back" or ans == "2":
             break
-        elif ans == "exit" or ans == "3":
+        elif ans.lower() == "exit" or ans == "3":
             raise SystemExit
         else:
             print("Invalid selection\n")
@@ -76,17 +101,18 @@ def menu_main():
         print("MAIN MENU\n")
         print("   URL to analyze: {}\n".format(URL[0]))
         print("1) Set/change URL")
-        print("2) Preferences")
-        print("3) Manage API Keys")
-        print("4) Analysis")
+        print("2) Analysis")
+        print("3) Preferences")
+        print("4) Manage API Keys")
         print("5) Exit\n")
         ans = input(">>> ")
+        print()
 
         if ans == "exit" or ans == "5":
             raise SystemExit
         elif ans == "1":
             set_url()
-        elif ans == "4":
+        elif ans == "2":
             menu_analysis()
         else:
             print("Invalid selection\n")
@@ -103,5 +129,12 @@ if __name__ == "__main__":
         URL[0] = args.URL
     else:
         URL[0] = ""
+
+    # Load saved preferences
+    try:
+        with open(os.environ['HOME']+"/.pynalyze", "r") as f:
+            content = f.read()
+    except FileNotFoundError:
+        print("No preferences file found. Using defaults.")
 
     menu_main()

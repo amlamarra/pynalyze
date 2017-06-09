@@ -14,19 +14,14 @@ def testuri(url):
         print("Something went wrong with the request")
         r.raise_for_status()
 
-    turi_source = r.text.split("\n")
-    print()
-    # code = turi_source.find("<h3>HTTP Response Headers</h3>")
-    header = "<H3>HTTP Response Headers</H3>"
-    # print([line for i, line in enumerate(turi_source) if header in line])
-    for i, line in enumerate(turi_source):
-        if header.lower() in line.lower():
-            print(line)
-            print(i)
-            linum = i
+    turi_source = r.text.lower().split("\n")
 
-    status = turi_source[linum+1].split("<b>Status</b>: ")[1]
-    status = status.split("<br><b>Content-Type</b>:")[0]
+    header = "<h3>http response headers</h3>"
+    line = [line for line in turi_source if header in line][0]
+    linum = turi_source.index(line) + 1
+
+    status = turi_source[linum].split("<b>status</b>: ")[1]
+    status = status.split("<br><b>content-type</b>:")[0]
     status = status.split(" ")[1]
 
-    print("Status code: {}".format(status))
+    print("Status code: {}\n".format(status))
