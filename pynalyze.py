@@ -3,6 +3,7 @@
 AUTHOR: Andrew Lamarra
 """
 
+import time
 import argparse
 import configparser
 import validators
@@ -55,23 +56,22 @@ def menu_preferences(config):
         def_proto = config["Preferences"]["DefaultProtocol"]
         follow_redir = config["Preferences"]["FollowRedirects"]
 
-        print("PREFERENCES MENU\n")
+        print("\nPREFERENCES MENU\n")
         print("1) Restore last saved URL upon starting Pynalyze")
-        print("   (currently = {})".format(rest_url))
-        print("2) Set default URL protocol when not specified")
-        print("   (currently = {})".format(def_proto))
+        print("   (currently = {})\n".format(rest_url))
+        print("2) Set default protocol when not specified in the URL")
+        print("   (currently = {})\n".format(def_proto))
         print("3) Automatically follow redirects when getting the page source")
         print("   Each URL in the redirect will still be displayed to you.")
-        print("   (currently = {})".format(follow_redir))
+        print("   (currently = {})\n".format(follow_redir))
         print("4) Back to main menu")
         print("5) Exit\n")
         ans = input(">>> ")
-        print()
 
         # Define what the options do
         if ans == "1":
             while True:
-                value = input("Change value from {} to {}? (Y/n) ".format(
+                value = input("\nChange value from {} to {}? (Y/n) ".format(
                     rest_url, (rest_url == "False"))).lower()
                 if value == "y" or value == "yes" or value == "":
                     config["Preferences"]["RestoreURL"] = str(rest_url == "False")
@@ -80,14 +80,38 @@ def menu_preferences(config):
                     break
                 else:
                     print("Please enter 'y' (yes) or 'n' (no)")
-            print()
+        elif ans == "2":
+            while True:
+                print("\n    1) HTTP")
+                print("    2) HTTPS")
+                value = input("    Select the protocol: ")
+                if value == "1":
+                    config["Preferences"]["DefaultProtocol"] = "HTTP"
+                    break
+                elif value == "2":
+                    config["Preferences"]["DefaultProtocol"] = "HTTPS"
+                    break
+                else:
+                    print("Please enter '1' or '2'")
+        elif ans == "3":
+            while True:
+                value = input("\nChange value from {} to {}? (Y/n) ".format(
+                    follow_redir, (follow_redir == "False"))).lower()
+                if value == "y" or value == "yes" or value == "":
+                    config["Preferences"]["FollowRedirects"] = str(
+                        follow_redir == "False")
+                    break
+                elif value == "n" or value == "no":
+                    break
+                else:
+                    print("Please enter 'y' (yes) or 'n' (no)")
         elif ans.lower() == "back" or ans == "4":
-            print()
             break
         elif ans.lower() == "exit" or ans == "5":
             raise SystemExit
         else:
-            print("Invalid Selection\n")
+            print("\n***INVALID SELECTION***")
+            time.sleep(1)
             continue
 
         # Save the settings
@@ -95,15 +119,14 @@ def menu_preferences(config):
             config.write(f)
 
 
-def menu_analysis():
+def menu_analysis(config):
     while True:
-        print("ANALYSIS MENU\n")
+        print("\nANALYSIS MENU\n")
         print("   URL to analyze: {}\n".format(URL[0]))
         print("1) Get page source")
         print("2) Back to main menu")
         print("3) Exit\n")
         ans = input(">>> ")
-        print()
 
         # Define what the options do
         if ans == "1":
@@ -116,12 +139,13 @@ def menu_analysis():
         elif ans.lower() == "exit" or ans == "3":
             raise SystemExit
         else:
-            print("Invalid selection\n")
+            print("\n***INVALID SELECTION***")
+            time.sleep(1)
 
 
 def menu_main(config):
     while True:
-        print("MAIN MENU\n")
+        print("\nMAIN MENU\n")
         print("   URL to analyze: {}\n".format(URL[0]))
         print("1) Set/change URL")
         print("2) Analysis")
@@ -129,7 +153,6 @@ def menu_main(config):
         print("4) Manage API Keys")
         print("5) Exit\n")
         ans = input(">>> ")
-        print()
 
         # Define what the options do
         if ans == "exit" or ans == "5":
@@ -141,19 +164,8 @@ def menu_main(config):
         elif ans == "3":
             menu_preferences(config)
         else:
-            print("Invalid selection\n")
-
-
-def initialize_preferences():
-    config = configparser.ConfigParser()
-    config.optionxform = str
-    config["Preferences"] = {"RestoreURL": False,
-                             "DefaultProtocol": "HTTP",
-                             "FollowRedirects": False}
-    with open("settings.ini", "w") as f:
-        config.write(f)
-
-    return config
+            print("\n***INVALID SELECTION***")
+            time.sleep(1)
 
 
 if __name__ == "__main__":
@@ -169,8 +181,15 @@ if __name__ == "__main__":
 
     # Load saved preferences
     config = configparser.ConfigParser()
+    config.optionxform = str
     config.read("settings.ini")
+
+    # Initialize preferences if settings.ini doesn't exist
     if not config.sections():
-        config = initialize_preferences()
+        config["Preferences"] = {"RestoreURL": False,
+                                 "DefaultProtocol": "HTTP",
+                                 "FollowRedirects": False}
+        with open("settings.ini", "w") as f:
+            config.write(f)
 
     menu_main(config)
