@@ -3,16 +3,15 @@
 AUTHOR: Andrew Lamarra
 """
 
-import os
 import argparse
+import configparser
 import validators
 from modules import analysis
-
 
 URL = [""]
 
 
-def set_url():
+def set_url(config):
     while True:
         URL[0] = input("Enter a URL to analyze: ")
 
@@ -50,27 +49,50 @@ def validate(url):
         return False
 
 
-def menu_preferences():
+def menu_preferences(config):
     while True:
+        rest_url = config["Preferences"]["RestoreURL"]
+        def_proto = config["Preferences"]["DefaultProtocol"]
+        follow_redir = config["Preferences"]["FollowRedirects"]
+
         print("PREFERENCES MENU\n")
         print("1) Restore last saved URL upon starting Pynalyze")
-        print("   (currently = False)")
+        print("   (currently = {})".format(rest_url))
         print("2) Set default URL protocol when not specified")
-        print("   (currently = HTTP)")
+        print("   (currently = {})".format(def_proto))
         print("3) Automatically follow redirects when getting the page source")
         print("   Each URL in the redirect will still be displayed to you.")
-        print("   (currently = False)")
+        print("   (currently = {})".format(follow_redir))
         print("4) Back to main menu")
         print("5) Exit\n")
         ans = input(">>> ")
         print()
 
-        if ans.lower() == "back" or ans == "4":
+        # Define what the options do
+        if ans == "1":
+            while True:
+                value = input("Change value from {} to {}? (Y/n) ".format(
+                    rest_url, (rest_url == "False"))).lower()
+                if value == "y" or value == "yes" or value == "":
+                    config["Preferences"]["RestoreURL"] = str(rest_url == "False")
+                    break
+                elif value == "n" or value == "no":
+                    break
+                else:
+                    print("Please enter 'y' (yes) or 'n' (no)")
+            print()
+        elif ans.lower() == "back" or ans == "4":
+            print()
             break
         elif ans.lower() == "exit" or ans == "5":
             raise SystemExit
         else:
             print("Invalid Selection\n")
+            continue
+
+        # Save the settings
+        with open("settings.ini", "w") as f:
+            config.write(f)
 
 
 def menu_analysis():
@@ -83,6 +105,7 @@ def menu_analysis():
         ans = input(">>> ")
         print()
 
+        # Define what the options do
         if ans == "1":
             if URL[0] == "":
                 print("The URL hasn't been set yet")
@@ -96,7 +119,7 @@ def menu_analysis():
             print("Invalid selection\n")
 
 
-def menu_main():
+def menu_main(config):
     while True:
         print("MAIN MENU\n")
         print("   URL to analyze: {}\n".format(URL[0]))
@@ -108,18 +131,32 @@ def menu_main():
         ans = input(">>> ")
         print()
 
+        # Define what the options do
         if ans == "exit" or ans == "5":
             raise SystemExit
         elif ans == "1":
-            set_url()
+            set_url(config)
         elif ans == "2":
-            menu_analysis()
+            menu_analysis(config)
+        elif ans == "3":
+            menu_preferences(config)
         else:
             print("Invalid selection\n")
 
 
-if __name__ == "__main__":
+def initialize_preferences():
+    config = configparser.ConfigParser()
+    config.optionxform = str
+    config["Preferences"] = {"RestoreURL": False,
+                             "DefaultProtocol": "HTTP",
+                             "FollowRedirects": False}
+    with open("settings.ini", "w") as f:
+        config.write(f)
 
+    return config
+
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Checks if a URL is malicious")
     parser.add_argument("URL", nargs="?", help="Provide the URL")
     args = parser.parse_args()
@@ -131,10 +168,9 @@ if __name__ == "__main__":
         URL[0] = ""
 
     # Load saved preferences
-    try:
-        with open(os.environ['HOME']+"/.pynalyze", "r") as f:
-            content = f.read()
-    except FileNotFoundError:
-        print("No preferences file found. Using defaults.")
+    config = configparser.ConfigParser()
+    config.read("settings.ini")
+    if not config.sections():
+        config = initialize_preferences()
 
-    menu_main()
+    menu_main(config)

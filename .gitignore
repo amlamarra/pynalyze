@@ -102,3 +102,9 @@ ENV/
 
 # HTML files
 *.html
+
+# Settings file
+settings.ini
+
+# Emacs autosave files
+.\#*
