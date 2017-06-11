@@ -16,10 +16,10 @@ def set_url():
 
         # Add the protocol if not supplied
         if "://" not in url:
-            url = "http://" + url
-            protocol = "http"
+            protocol = cfg["Settings"]["DefaultProtocol"].lower()
+            url = "{}://{}".format(protocol, url)
         else:
-            protocol = url.split("://")[0]
+            protocol = url.split("://")[0].lower()
 
         # Only accept HTTP and HTTPS
         if protocol != "http" and protocol != "https":
