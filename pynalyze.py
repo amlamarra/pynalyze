@@ -128,7 +128,7 @@ def menu_analysis(url):
             if url == "":
                 print("The URL hasn't been set yet")
             else:
-                analysis.testuri(url)
+                analysis.get_source(url)
         elif ans.lower() == "back" or ans == "2":
             break
         elif ans.lower() == "exit" or ans == "3":
