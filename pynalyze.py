@@ -4,59 +4,50 @@ AUTHOR: Andrew Lamarra
 """
 
 import time
-import argparse
+# import argparse
 import configparser
 import validators
 from modules import analysis
 
-URL = [""]
 
-
-def set_url(config):
+def set_url():
     while True:
-        URL[0] = input("Enter a URL to analyze: ")
+        url = input("\nEnter a URL to analyze: ")
 
         # Add the protocol if not supplied
-        if "://" not in URL[0]:
-            URL[0] = "http://" + URL[0]
+        if "://" not in url:
+            url = "http://" + url
             protocol = "http"
         else:
-            protocol = URL[0].split("://")[0]
+            protocol = url.split("://")[0]
 
         # Only accept HTTP and HTTPS
         if protocol != "http" and protocol != "https":
-            print("This only accepts either the HTTP or HTTPS protocol\n")
+            print("This only accepts either the HTTP or HTTPS protocols")
+            continue
+
+        # Validate that it IS a URL
+        if not validators.url(url):
+            print("Invalid URL")
         else:
             break
 
-    # Validate that it IS a URL
-    if validate(URL[0]):
-        print("Good URL\n")
-    else:
-        print("Bad URL\n")
-        raise SystemExit
+    # Save the URL
+    if cfg["Settings"]["RestoreURL"] == "True":
+        cfg["Main"] = {"URL": url}
+        with open("settings.ini", "w") as f:
+            cfg.write(f)
+
+    return url
 
 
-def validate(url):
-    """ Ensures that the provided URL is a valid URL
-    ACCEPTS: 1 string (the URL)
-    RETURNS: 1 boolean value
-    """
-
-    print("\nValidating {}".format(url))
-    if validators.url(url):
-        return True
-    else:
-        return False
-
-
-def menu_preferences(config):
+def menu_settings(url):
     while True:
-        rest_url = config["Preferences"]["RestoreURL"]
-        def_proto = config["Preferences"]["DefaultProtocol"]
-        follow_redir = config["Preferences"]["FollowRedirects"]
+        rest_url = cfg["Settings"]["RestoreURL"]
+        def_proto = cfg["Settings"]["DefaultProtocol"]
+        follow_redir = cfg["Settings"]["FollowRedirects"]
 
-        print("\nPREFERENCES MENU\n")
+        print("\nSETTINGS MENU\n")
         print("1) Restore last saved URL upon starting Pynalyze")
         print("   (currently = {})\n".format(rest_url))
         print("2) Set default protocol when not specified in the URL")
@@ -74,7 +65,11 @@ def menu_preferences(config):
                 value = input("\nChange value from {} to {}? (Y/n) ".format(
                     rest_url, (rest_url == "False"))).lower()
                 if value == "y" or value == "yes" or value == "":
-                    config["Preferences"]["RestoreURL"] = str(rest_url == "False")
+                    cfg["Settings"]["RestoreURL"] = str(rest_url == "False")
+                    if cfg["Settings"]["RestoreURL"] == "True" and url:
+                        cfg["Main"] = {"URL": url}
+                    elif cfg["Settings"]["RestoreURL"] == "False" and url:
+                        cfg.remove_section("Main")
                     break
                 elif value == "n" or value == "no":
                     break
@@ -86,10 +81,10 @@ def menu_preferences(config):
                 print("    2) HTTPS")
                 value = input("    Select the protocol: ")
                 if value == "1":
-                    config["Preferences"]["DefaultProtocol"] = "HTTP"
+                    cfg["Settings"]["DefaultProtocol"] = "HTTP"
                     break
                 elif value == "2":
-                    config["Preferences"]["DefaultProtocol"] = "HTTPS"
+                    cfg["Settings"]["DefaultProtocol"] = "HTTPS"
                     break
                 else:
                     print("Please enter '1' or '2'")
@@ -98,7 +93,7 @@ def menu_preferences(config):
                 value = input("\nChange value from {} to {}? (Y/n) ".format(
                     follow_redir, (follow_redir == "False"))).lower()
                 if value == "y" or value == "yes" or value == "":
-                    config["Preferences"]["FollowRedirects"] = str(
+                    cfg["Settings"]["FollowRedirects"] = str(
                         follow_redir == "False")
                     break
                 elif value == "n" or value == "no":
@@ -116,13 +111,13 @@ def menu_preferences(config):
 
         # Save the settings
         with open("settings.ini", "w") as f:
-            config.write(f)
+            cfg.write(f)
 
 
-def menu_analysis(config):
+def menu_analysis(url):
     while True:
         print("\nANALYSIS MENU\n")
-        print("   URL to analyze: {}\n".format(URL[0]))
+        print("   URL to analyze: {}\n".format(url))
         print("1) Get page source")
         print("2) Back to main menu")
         print("3) Exit\n")
@@ -130,10 +125,10 @@ def menu_analysis(config):
 
         # Define what the options do
         if ans == "1":
-            if URL[0] == "":
+            if url == "":
                 print("The URL hasn't been set yet")
             else:
-                analysis.testuri(URL[0])
+                analysis.testuri(url)
         elif ans.lower() == "back" or ans == "2":
             break
         elif ans.lower() == "exit" or ans == "3":
@@ -143,53 +138,60 @@ def menu_analysis(config):
             time.sleep(1)
 
 
-def menu_main(config):
+def menu_main():
+    # Attempt to load the saved URL
+    try:
+        url = cfg["Main"]["URL"]
+    except KeyError:
+        url = ""
+
     while True:
         print("\nMAIN MENU\n")
-        print("   URL to analyze: {}\n".format(URL[0]))
+        print("   URL to analyze: {}\n".format(url))
         print("1) Set/change URL")
         print("2) Analysis")
-        print("3) Preferences")
+        print("3) Settings")
         print("4) Manage API Keys")
         print("5) Exit\n")
         ans = input(">>> ")
 
         # Define what the options do
-        if ans == "exit" or ans == "5":
-            raise SystemExit
-        elif ans == "1":
-            set_url(config)
-        elif ans == "2":
-            menu_analysis(config)
+        if ans == "1":
+            url = set_url()
+        elif ans == "2" and url == "":
+            print("\nYou must first set a URL")
+            time.sleep(1)
+        elif ans == "2" and url != "":
+            menu_analysis(url)
         elif ans == "3":
-            menu_preferences(config)
+            menu_settings(url)
+        elif ans == "4":
+            print("\nNot yet implemented")
+            time.sleep(1)
+        elif ans == "5" or ans.lower() == "exit":
+            raise SystemExit
         else:
             print("\n***INVALID SELECTION***")
             time.sleep(1)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Checks if a URL is malicious")
-    parser.add_argument("URL", nargs="?", help="Provide the URL")
-    args = parser.parse_args()
+    # I may use arguments in the future, but not right now
+    # parser = argparse.ArgumentParser(description="Analyze a URL")
+    # parser.add_argument("URL", nargs="?", help="Provide the URL")
+    # args = parser.parse_args()
 
-    # Save the URL if one was supplied
-    if args.URL:
-        URL[0] = args.URL
-    else:
-        URL[0] = ""
+    # Load saved settings
+    cfg = configparser.ConfigParser()
+    cfg.optionxform = str
+    cfg.read("settings.ini")
 
-    # Load saved preferences
-    config = configparser.ConfigParser()
-    config.optionxform = str
-    config.read("settings.ini")
-
-    # Initialize preferences if settings.ini doesn't exist
-    if not config.sections():
-        config["Preferences"] = {"RestoreURL": False,
-                                 "DefaultProtocol": "HTTP",
-                                 "FollowRedirects": False}
+    # Initialize settings if settings.ini doesn't exist
+    if not cfg.sections():
+        cfg["Settings"] = {"RestoreURL": False,
+                           "DefaultProtocol": "HTTP",
+                           "FollowRedirects": False}
         with open("settings.ini", "w") as f:
-            config.write(f)
+            cfg.write(f)
 
-    menu_main(config)
+    menu_main()
