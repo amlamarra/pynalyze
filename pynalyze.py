@@ -3,14 +3,32 @@
 AUTHOR: Andrew Lamarra
 """
 
+import os
 import time
 # import argparse
+import sqlite3
 import configparser
 import validators
 from modules import analysis
 
 
+def is_sqlite3(filename):
+    """Check to see if a file is a SQLite database"""
+    from os.path import isfile, getsize
+
+    if not isfile(filename):
+        return False
+    if getsize(filename) < 100:  # SQLite database file header is 100 bytes
+        return False
+
+    with open(filename, 'rb') as fd:
+        header = fd.read(100)
+
+    return header[:16] == 'SQLite format 3\x00'
+
+
 def set_url():
+    """Get the URL to analyze from the user"""
     while True:
         url = input("\nEnter a URL to analyze: ")
 
@@ -39,6 +57,11 @@ def set_url():
             cfg.write(f)
 
     return url
+
+
+def menu_apikeys():
+    while True:
+        print("\nAPI KEYS MENU\n")
 
 
 def menu_settings(url):
@@ -193,5 +216,17 @@ if __name__ == "__main__":
                            "FollowRedirects": False}
         with open("settings.ini", "w") as f:
             cfg.write(f)
+
+    # Initialize the API keys database if it doesn't exist
+    if not is_sqlite3("api_keys.db"):
+        os.remove("api_keys.db")
+        conn = sqlite3.connect("api_keys.db")
+        cur = conn.cursor()
+        cur.execute("CREATE TABLE keys (service text, key text)")
+    else:
+        conn = sqlite3.connect("api_keys.db")
+        cur = conn.cursor()
+    conn.commit()
+    conn.close()
 
     menu_main()
