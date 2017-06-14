@@ -12,21 +12,6 @@ import validators
 from modules import analysis
 
 
-def is_sqlite3(filename):
-    """Check to see if a file is a SQLite database"""
-    from os.path import isfile, getsize
-
-    if not isfile(filename):
-        return False
-    if getsize(filename) < 100:  # SQLite database file header is 100 bytes
-        return False
-
-    with open(filename, 'rb') as fd:
-        header = fd.read(100)
-
-    return header[:16] == 'SQLite format 3\x00'
-
-
 def set_url():
     """Get the URL to analyze from the user"""
     while True:
@@ -59,9 +44,41 @@ def set_url():
     return url
 
 
+def list_keys():
+    cur.execute("SELECT * FROM keys")
+    data = cur.fetchall()
+
+    max_name_len = len(max([row[0] for row in data if row[0]], key=len))
+    max_key_len = len(max([row[1] for row in data if row[1]], key=len))
+
+    print(" +-{}-+-{}-+".format("-"*max_name_len, "-"*max_key_len))
+    print(" | Service{} | Key{} |".format(" "*(max_name_len-7), " "*(max_key_len-3)))
+    print(" +-{}-+-{}-+".format("-"*max_name_len, "-"*max_key_len))
+    for row in data:
+        print(" | {} | {} |".format(row[0]+" "*(max_name_len-len(row[0])), row[1]+" "*(max_key_len-len(row[1]))))
+    print(" +-{}-+-{}-+".format("-"*max_name_len, "-"*max_key_len))
+
+
 def menu_apikeys():
     while True:
         print("\nAPI KEYS MENU\n")
+        print("1) List current API keys")
+        print("2) Add/change/remove a key")
+        print("3) Back to main menu")
+        print("4) Exit\n")
+        ans = input(">>> ")
+
+        if ans == "1":
+            print()
+            list_keys()
+        elif ans.lower() == "back" or ans == "3":
+            break
+        elif ans.lower() == "exit" or ans == "4":
+            raise SystemExit
+        else:
+            print("\n***INVALID SELECTION***")
+            time.sleep(1)
+            continue
 
 
 def menu_settings(url):
@@ -189,13 +206,27 @@ def menu_main():
         elif ans == "3":
             menu_settings(url)
         elif ans == "4":
-            print("\nNot yet implemented")
-            time.sleep(1)
+            menu_apikeys()
         elif ans == "5" or ans.lower() == "exit":
             raise SystemExit
         else:
             print("\n***INVALID SELECTION***")
             time.sleep(1)
+
+
+def is_sqlite3(filename):
+    """Check to see if a file is a SQLite database"""
+    from os.path import isfile, getsize
+
+    if not isfile(filename):
+        return False
+    if getsize(filename) < 100:  # SQLite database file header is 100 bytes
+        return False
+
+    with open(filename, "rb") as fd:
+        header = fd.read(100)
+
+    return header[:16] == b"SQLite format 3\x00"
 
 
 if __name__ == "__main__":
@@ -218,15 +249,16 @@ if __name__ == "__main__":
             cfg.write(f)
 
     # Initialize the API keys database if it doesn't exist
-    if not is_sqlite3("api_keys.db"):
-        os.remove("api_keys.db")
-        conn = sqlite3.connect("api_keys.db")
+    db_file = "api_keys.db"
+    if not is_sqlite3(db_file):
+        if os.path.isfile(db_file):
+            os.remove(db_file)
+        conn = sqlite3.connect(db_file)
         cur = conn.cursor()
         cur.execute("CREATE TABLE keys (service text, key text)")
     else:
-        conn = sqlite3.connect("api_keys.db")
+        conn = sqlite3.connect(db_file)
         cur = conn.cursor()
     conn.commit()
-    conn.close()
 
     menu_main()
