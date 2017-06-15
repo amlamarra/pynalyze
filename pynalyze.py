@@ -45,17 +45,30 @@ def set_url():
 
 
 def list_keys():
+    # Query the database & save the results
     cur.execute("SELECT * FROM keys")
     data = cur.fetchall()
 
-    max_name_len = len(max([row[0] for row in data if row[0]], key=len))
-    max_key_len = len(max([row[1] for row in data if row[1]], key=len))
+    # Get the string length of the longest key name & key
+    max_name_len = len(max([row[0] for row in data], key=len))
+    max_key_len = len(max([row[1] for row in data], key=len))
 
+    # These lengths shouldn't be less than 7 & 3 for the header row names
+    if max_name_len < 7:
+        max_name_len = 7
+    if max_key_len < 3:
+        max_key_len = 3
+
+    # Print it all out in a nicely formatted table
     print(" +-{}-+-{}-+".format("-"*max_name_len, "-"*max_key_len))
-    print(" | Service{} | Key{} |".format(" "*(max_name_len-7), " "*(max_key_len-3)))
+    name_buff = " " * (max_name_len - 7)
+    key_buff = " " * (max_key_len - 3)
+    print(" | Service{} | Key{} |".format(name_buff, key_buff))
     print(" +-{}-+-{}-+".format("-"*max_name_len, "-"*max_key_len))
     for row in data:
-        print(" | {} | {} |".format(row[0]+" "*(max_name_len-len(row[0])), row[1]+" "*(max_key_len-len(row[1]))))
+        name = row[0] + " " * (max_name_len - len(row[0]))
+        key = row[1] + " " * (max_key_len - len(row[1]))
+        print(" | {} | {} |".format(name, key))
     print(" +-{}-+-{}-+".format("-"*max_name_len, "-"*max_key_len))
 
 
@@ -256,6 +269,8 @@ if __name__ == "__main__":
         conn = sqlite3.connect(db_file)
         cur = conn.cursor()
         cur.execute("CREATE TABLE keys (service text, key text)")
+        cur.execute("INSERT INTO keys VALUES ('VirusTotal', '')")
+        cur.execute("INSERT INTO keys VALUES ('IPinfoDB', '')")
     else:
         conn = sqlite3.connect(db_file)
         cur = conn.cursor()
