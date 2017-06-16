@@ -50,8 +50,8 @@ def list_keys():
     data = cur.fetchall()
 
     # Get the string length of the longest key name & key
-    max_name_len = len(max([row[0] for row in data], key=len))
-    max_key_len = len(max([row[1] for row in data], key=len))
+    max_name_len = len(max([row[1] for row in data], key=len))
+    max_key_len = len(max([row[2] for row in data], key=len))
 
     # These lengths shouldn't be less than 7 & 3 for the header row names
     if max_name_len < 4:
@@ -66,9 +66,9 @@ def list_keys():
     print(" | Service{} | Key{} |".format(name_buff, key_buff))
     print(" +-{}-+-{}-+".format("-"*(max_name_len+3), "-"*max_key_len))
     for i, row in enumerate(data):
-        name = row[0] + " " * (max_name_len - len(row[0]))
-        key = row[1] + " " * (max_key_len - len(row[1]))
-        print(" | {}. {} | {} |".format(i+1, name, key))
+        name = row[1] + " " * (max_name_len - len(row[1]))
+        key = row[2] + " " * (max_key_len - len(row[2]))
+        print(" | {}. {} | {} |".format(data[i][0], name, key))
     print(" +-{}-+-{}-+".format("-"*(max_name_len+3), "-"*max_key_len))
 
 
@@ -84,10 +84,15 @@ def menu_apikeys():
         if ans == "1":
             print()
             list_keys()
-        if ans == "2":
+        elif ans == "2":
             cur.execute("SELECT COUNT(*) FROM keys")
             rows = cur.fetchall()[0][0]
-            ans2 = input("Which one? (1-{}) ".format(rows))
+            num = input("Which one? (1-{}) ".format(rows))
+            while not num.isdigit() or int(num) < 1 or int(num) > rows:
+                num = input("Please enter a number from 1 to {}: ".format(rows))
+            key = input("\nEnter the key: ")
+            cur.execute("UPDATE keys SET key=? WHERE id=?", (key, num))
+            conn.commit()
         elif ans.lower() == "back" or ans == "3":
             break
         elif ans.lower() == "exit" or ans == "4":
