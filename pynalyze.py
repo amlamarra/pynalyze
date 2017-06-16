@@ -54,22 +54,22 @@ def list_keys():
     max_key_len = len(max([row[1] for row in data], key=len))
 
     # These lengths shouldn't be less than 7 & 3 for the header row names
-    if max_name_len < 7:
-        max_name_len = 7
+    if max_name_len < 4:
+        max_name_len = 4
     if max_key_len < 3:
         max_key_len = 3
 
     # Print it all out in a nicely formatted table
-    print(" +-{}-+-{}-+".format("-"*max_name_len, "-"*max_key_len))
-    name_buff = " " * (max_name_len - 7)
+    print(" +-{}-+-{}-+".format("-"*(max_name_len+3), "-"*max_key_len))
+    name_buff = " " * (max_name_len - 4)
     key_buff = " " * (max_key_len - 3)
     print(" | Service{} | Key{} |".format(name_buff, key_buff))
-    print(" +-{}-+-{}-+".format("-"*max_name_len, "-"*max_key_len))
-    for row in data:
+    print(" +-{}-+-{}-+".format("-"*(max_name_len+3), "-"*max_key_len))
+    for i, row in enumerate(data):
         name = row[0] + " " * (max_name_len - len(row[0]))
         key = row[1] + " " * (max_key_len - len(row[1]))
-        print(" | {} | {} |".format(name, key))
-    print(" +-{}-+-{}-+".format("-"*max_name_len, "-"*max_key_len))
+        print(" | {}. {} | {} |".format(i+1, name, key))
+    print(" +-{}-+-{}-+".format("-"*(max_name_len+3), "-"*max_key_len))
 
 
 def menu_apikeys():
@@ -84,6 +84,10 @@ def menu_apikeys():
         if ans == "1":
             print()
             list_keys()
+        if ans == "2":
+            cur.execute("SELECT COUNT(*) FROM keys")
+            rows = cur.fetchall()[0][0]
+            ans2 = input("Which one? (1-{}) ".format(rows))
         elif ans.lower() == "back" or ans == "3":
             break
         elif ans.lower() == "exit" or ans == "4":
@@ -268,9 +272,9 @@ if __name__ == "__main__":
             os.remove(db_file)
         conn = sqlite3.connect(db_file)
         cur = conn.cursor()
-        cur.execute("CREATE TABLE keys (service text, key text)")
-        cur.execute("INSERT INTO keys VALUES ('VirusTotal', '')")
-        cur.execute("INSERT INTO keys VALUES ('IPinfoDB', '')")
+        cur.execute("CREATE TABLE keys (id integer PRIMARY KEY, service text, key text)")
+        cur.execute("INSERT INTO keys VALUES (1, 'VirusTotal', '')")
+        cur.execute("INSERT INTO keys VALUES (2, 'IPinfoDB', '')")
     else:
         conn = sqlite3.connect(db_file)
         cur = conn.cursor()
