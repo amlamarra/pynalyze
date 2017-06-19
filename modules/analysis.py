@@ -32,3 +32,36 @@ def get_source(url):
     source = source.split("</textarea>")[0]
     source = html.unescape(source)
     print(source)
+
+
+def virustotal_submit(url, cur):
+    print("Submitting {}\n".format(url))
+    cur.execute("SELECT key FROM keys WHERE service='VirusTotal'")
+    key = cur.fetchall()[0][0]
+    if not key:
+        print("No VirusTotal API key...\n")
+        return
+
+    params = {"apikey": key, "url": url}
+    r = requests.post("https://www.virustotal.com/vtapi/v2/url/scan", data=params)
+    json = r.json()
+    print(json["verbose_msg"])
+    print("Scan date: {}".format(json["scan_date"]))
+    print("Response code: {}".format(json["response_code"]))
+
+    return json["scan_id"]
+
+
+def virustotal_retrieve(cur, scan_id):
+    cur.execute("SELECT key FROM keys WHERE service='VirusTotal'")
+    key = cur.fetchall()[0][0]
+    params = {"apikey": key, "resource": scan_id}
+    r = requests.post("https://www.virustotal.com/vtapi/v2/url/report", data=params)
+    json = r.json()
+    print(json["verbose_msg"])
+    print("Response code: {}".format(json["response_code"]))
+    print("VirusTotal found {} positive result(s) out of {} scans".format(json["positives"], json["total"]))
+
+    for scanner in json["scans"]:
+        if json["scans"][scanner]["detected"]:
+            print("{}: {}".format(scanner, json["scans"][scanner]["result"]))

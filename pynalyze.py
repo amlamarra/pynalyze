@@ -74,7 +74,8 @@ def list_keys():
 
 def menu_apikeys():
     while True:
-        print("\nAPI KEYS MENU\n")
+        print("\nAPI KEYS MENU")
+        print("=============\n")
         print("1) List current API keys")
         print("2) Add/change/remove a key")
         print("3) Back to main menu")
@@ -90,7 +91,7 @@ def menu_apikeys():
             num = input("Which one? (1-{}) ".format(rows))
             while not num.isdigit() or int(num) < 1 or int(num) > rows:
                 num = input("Please enter a number from 1 to {}: ".format(rows))
-            key = input("\nEnter the key: ")
+            key = input("\nEnter the key (leave blank to remove it): ")
             cur.execute("UPDATE keys SET key=? WHERE id=?", (key, num))
             conn.commit()
         elif ans.lower() == "back" or ans == "3":
@@ -109,7 +110,8 @@ def menu_settings(url):
         def_proto = cfg["Settings"]["DefaultProtocol"]
         follow_redir = cfg["Settings"]["FollowRedirects"]
 
-        print("\nSETTINGS MENU\n")
+        print("\nSETTINGS MENU")
+        print("=============\n")
         print("1) Restore last saved URL upon starting Pynalyze")
         print("   (currently = {})\n".format(rest_url))
         print("2) Set default protocol when not specified in the URL")
@@ -178,11 +180,14 @@ def menu_settings(url):
 
 def menu_analysis(url):
     while True:
-        print("\nANALYSIS MENU\n")
+        print("\nANALYSIS MENU")
+        print("=============\n")
         print("   URL to analyze: {}\n".format(url))
         print("1) Get page source")
-        print("2) Back to main menu")
-        print("3) Exit\n")
+        print("2) Submit to VirusTotal")
+        print("3) Retrieve VirusTotal report")
+        print("4) Back to main menu")
+        print("5) Exit\n")
         ans = input(">>> ")
 
         # Define what the options do
@@ -191,9 +196,19 @@ def menu_analysis(url):
                 print("The URL hasn't been set yet")
             else:
                 analysis.get_source(url)
-        elif ans.lower() == "back" or ans == "2":
+        elif ans == "2":
+            if url == "":
+                print("The URL hasn't been set yet")
+            else:
+                scan_id = analysis.virustotal_submit(url, cur)
+        elif ans == "3":
+            if not scan_id:
+                print("You need to submit the URL to VirusTotal first")
+                continue
+            analysis.virustotal_retrieve(cur, scan_id)
+        elif ans.lower() == "back" or ans == "4":
             break
-        elif ans.lower() == "exit" or ans == "3":
+        elif ans.lower() == "exit" or ans == "5":
             raise SystemExit
         else:
             print("\n***INVALID SELECTION***")
@@ -208,7 +223,8 @@ def menu_main():
         url = ""
 
     while True:
-        print("\nMAIN MENU\n")
+        print("\nMAIN MENU")
+        print("=========\n")
         print("   URL to analyze: {}\n".format(url))
         print("1) Set/change URL")
         print("2) Analysis")
