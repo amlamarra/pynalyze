@@ -82,5 +82,5 @@ def ipinfo(url, cur):
         params["ip"] = ""
 
     info_url = "https://api.ipinfodb.com/v3/ip-city"
-    r = requests.post(info_url, data=params)
+    r = requests.get(info_url, params=params)
     json = r.json()
