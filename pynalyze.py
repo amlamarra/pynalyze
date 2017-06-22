@@ -17,6 +17,10 @@ def set_url():
     while True:
         url = input("\nEnter a URL to analyze: ")
 
+        # Allow the user to set an empty URL for some reason
+        if url == "":
+            break
+
         # Add the protocol if not supplied
         if "://" not in url:
             protocol = cfg["Settings"]["DefaultProtocol"].lower()
@@ -179,6 +183,7 @@ def menu_settings(url):
 
 
 def menu_analysis(url):
+    scan_id = ""
     while True:
         print("\nANALYSIS MENU")
         print("=============\n")
@@ -192,20 +197,15 @@ def menu_analysis(url):
 
         # Define what the options do
         if ans == "1":
-            if url == "":
-                print("The URL hasn't been set yet")
-            else:
-                analysis.get_source(url)
+            analysis.get_source(url)
         elif ans == "2":
-            if url == "":
-                print("The URL hasn't been set yet")
-            else:
-                scan_id = analysis.virustotal_submit(url, cur)
+            scan_id = analysis.virustotal_submit(url, cur)
         elif ans == "3":
             if not scan_id:
-                print("You need to submit the URL to VirusTotal first")
-                continue
-            analysis.virustotal_retrieve(cur, scan_id)
+                print("\nYou need to submit the URL to VirusTotal first")
+                time.sleep(1)
+            else:
+                analysis.virustotal_retrieve(cur, scan_id)
         elif ans.lower() == "back" or ans == "4":
             break
         elif ans.lower() == "exit" or ans == "5":
@@ -236,11 +236,12 @@ def menu_main():
         # Define what the options do
         if ans == "1":
             url = set_url()
-        elif ans == "2" and url == "":
-            print("\nYou must first set a URL")
-            time.sleep(1)
-        elif ans == "2" and url != "":
-            menu_analysis(url)
+        elif ans == "2":
+            if url == "":
+                print("\nYou must set a URL")
+                time.sleep(1)
+            else:
+                menu_analysis(url)
         elif ans == "3":
             menu_settings(url)
         elif ans == "4":

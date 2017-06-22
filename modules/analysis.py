@@ -64,4 +64,4 @@ def virustotal_retrieve(cur, scan_id):
 
     for scanner in json["scans"]:
         if json["scans"][scanner]["detected"]:
-            print("{}: {}".format(scanner, json["scans"][scanner]["result"]))
+            print("\t{}: {}".format(scanner, json["scans"][scanner]["result"]))
