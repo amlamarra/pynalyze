@@ -1,4 +1,5 @@
 import html
+import socket
 import requests
 
 
@@ -12,7 +13,7 @@ def get_source(url):
     r = requests.post("http://testuri.org/sniffer", data=payload)
 
     if r.status_code != requests.codes.ok:
-        print("Something went wrong with the request")
+        print("\nSomething went wrong with the request\n")
         r.raise_for_status()
         return
 
@@ -65,3 +66,21 @@ def virustotal_retrieve(cur, scan_id):
     for scanner in json["scans"]:
         if json["scans"][scanner]["detected"]:
             print("\t{}: {}".format(scanner, json["scans"][scanner]["result"]))
+
+
+def ipinfo(url, cur):
+    cur.execute("SELECT key FROM keys WHERE service='IPinfoDB'")
+    key = cur.fetchall()[0][0]
+    params = {"key": key, "format": "json"}
+
+    domain = url.split("/")[2]
+    try:
+        # Get the IP address from the domain
+        params["ip"] = socket.gethostbyname(domain)
+    except socket.herror:
+        # If domain is not found...
+        params["ip"] = ""
+
+    info_url = "https://api.ipinfodb.com/v3/ip-city"
+    r = requests.post(info_url, data=params)
+    json = r.json()
