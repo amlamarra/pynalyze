@@ -4,6 +4,8 @@ import pprint
 import time
 import requests
 
+vt_url = "https://www.virustotal.com/vtapi/v2/url/"
+
 
 def get_source(url):
     """ Uses testuri.org to get the contents of a page.
@@ -38,6 +40,8 @@ def get_source(url):
 
 
 def virustotal_submit(url, cur):
+    """ Submits a URL to VirusTotal for scanning """
+
     print("Submitting {}\n".format(url))
     cur.execute("SELECT key FROM keys WHERE service='VirusTotal'")
     key = cur.fetchall()[0][0]
@@ -46,7 +50,7 @@ def virustotal_submit(url, cur):
         return
 
     params = {"apikey": key, "url": url}
-    r = requests.post("https://www.virustotal.com/vtapi/v2/url/scan", data=params)
+    r = requests.post(vt_url+"scan", data=params)
     json = r.json()
     print(json["verbose_msg"])
     print("Scan date: {}".format(json["scan_date"]))
@@ -56,14 +60,17 @@ def virustotal_submit(url, cur):
 
 
 def virustotal_retrieve(cur, scan_id):
+    """ Retrieves the scan report from VirusTotal """
+
     cur.execute("SELECT key FROM keys WHERE service='VirusTotal'")
     key = cur.fetchall()[0][0]
     params = {"apikey": key, "resource": scan_id}
-    r = requests.post("https://www.virustotal.com/vtapi/v2/url/report", data=params)
+    r = requests.post(vt_url+"report", data=params)
     json = r.json()
     print(json["verbose_msg"])
     print("Response code: {}".format(json["response_code"]))
-    print("VirusTotal found {} positive result(s) out of {} scans".format(json["positives"], json["total"]))
+    print("VirusTotal found {} positive result(s) out of {} scans".format(
+        json["positives"], json["total"]))
 
     for scanner in json["scans"]:
         if json["scans"][scanner]["detected"]:
@@ -71,6 +78,8 @@ def virustotal_retrieve(cur, scan_id):
 
 
 def ipinfo(url, cur):
+    """ Gets the location of an IP address from IPinfoDB.com """
+
     cur.execute("SELECT key FROM keys WHERE service='IPinfoDB'")
     key = cur.fetchall()[0][0]
     params = {"key": key, "format": "json"}
