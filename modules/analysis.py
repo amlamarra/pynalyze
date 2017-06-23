@@ -1,5 +1,7 @@
 import html
 import socket
+import pprint
+import time
 import requests
 
 
@@ -77,10 +79,14 @@ def ipinfo(url, cur):
     try:
         # Get the IP address from the domain
         params["ip"] = socket.gethostbyname(domain)
-    except socket.herror:
+    except socket.gaierror:
         # If domain is not found...
-        params["ip"] = ""
+        print("\nNo IP address found for that domain")
+        time.sleep(1.5)
+        return
 
     info_url = "https://api.ipinfodb.com/v3/ip-city"
     r = requests.get(info_url, params=params)
     json = r.json()
+
+    pprint.pprint(json)

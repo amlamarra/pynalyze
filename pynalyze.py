@@ -191,8 +191,9 @@ def menu_analysis(url):
         print("1) Get page source")
         print("2) Submit to VirusTotal")
         print("3) Retrieve VirusTotal report")
-        print("4) Back to main menu")
-        print("5) Exit\n")
+        print("4) Get IP location info")
+        print("5) Back to main menu")
+        print("6) Exit\n")
         ans = input(">>> ")
 
         # Define what the options do
@@ -206,9 +207,11 @@ def menu_analysis(url):
                 time.sleep(1)
             else:
                 analysis.virustotal_retrieve(cur, scan_id)
-        elif ans.lower() == "back" or ans == "4":
+        elif ans == "4":
+            analysis.ipinfo(url, cur)
+        elif ans.lower() == "back" or ans == "5":
             break
-        elif ans.lower() == "exit" or ans == "5":
+        elif ans.lower() == "exit" or ans == "6":
             raise SystemExit
         else:
             print("\n***INVALID SELECTION***")
