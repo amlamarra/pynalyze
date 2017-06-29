@@ -82,6 +82,10 @@ def ipinfo(url, cur):
 
     cur.execute("SELECT key FROM keys WHERE service='IPinfoDB'")
     key = cur.fetchall()[0][0]
+    if not key:
+        print("No IPinfoDB key...\n")
+        return
+
     params = {"key": key, "format": "json"}
 
     domain = url.split("/")[2]
