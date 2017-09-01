@@ -21,16 +21,22 @@ def get_source(url):
         r.raise_for_status()
         return
 
-    turi_src = r.text.lower().split("\n")
+    turi_src = r.text.split("\n")
 
     # Extract the status code
     header = "<h3>http response headers</h3>"
-    line = [line for line in turi_src if header in line][0]
+    line = [line for line in turi_src if header in line.lower()][0]
     linum = turi_src.index(line) + 1
-    status = turi_src[linum].split("<b>status</b>: ")[1]
+    status = turi_src[linum].lower().split("<b>status</b>: ")[1]
     status = status.split("<br><b>content-type</b>:")[0]
     status = status.split(" ")[1]
     print("Status code: {}\n".format(status))
+
+    if "30" in status:
+        # Get the redirect URL
+        redirect = turi_src[linum].split("</a><BR><B>")[0]
+        redirect = redirect.split("'>")[1]
+        print("Redirect URL: {}\n".format(redirect))
 
     # Extract the page source
     source = r.text.split("<textarea>")[1]
