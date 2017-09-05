@@ -45,6 +45,8 @@ def set_url():
         with open("settings.ini", "w") as f:
             cfg.write(f)
 
+    os.system("cls" if os.name == "nt" else "clear")
+
     return url
 
 
@@ -76,6 +78,25 @@ def list_keys():
     print(" +-{}-+-{}-+".format("-"*(max_name_len+3), "-"*max_key_len))
 
 
+def change_keys():
+    # NO WAY TO ADD A NEW KEY, FIX THIS
+    cur.execute("SELECT COUNT(*) FROM keys")
+    rows = cur.fetchall()[0][0]
+    if len(rows) > 1:
+        num = input("Which one? (1-{}, c to cancel) ".format(rows))
+    else:
+        num = input("Which one? (1, c to cancel) ".format(rows))
+    while not num.isdigit() or int(num) < 1 or int(num) > rows:
+        if num == "c":
+            break
+        num = input("Please enter a number from 1 to {} (c to cancel): "
+                    .format(rows))
+    else:
+        key = input("\nEnter the key (leave blank to remove it): ")
+        cur.execute("UPDATE keys SET key=? WHERE id=?", (key, num))
+        conn.commit()
+
+
 def menu_apikeys():
     while True:
         print("\nAPI KEYS MENU")
@@ -85,22 +106,16 @@ def menu_apikeys():
         print("3) Back to main menu")
         print("4) Exit\n")
         ans = input(">>> ")
+        os.system("cls" if os.name == "nt" else "clear")
 
         if ans == "1":
             print()
             list_keys()
         elif ans == "2":
-            cur.execute("SELECT COUNT(*) FROM keys")
-            rows = cur.fetchall()[0][0]
-            num = input("Which one? (1-{}) ".format(rows))
-            while not num.isdigit() or int(num) < 1 or int(num) > rows:
-                num = input("Please enter a number from 1 to {}: ".format(rows))
-            key = input("\nEnter the key (leave blank to remove it): ")
-            cur.execute("UPDATE keys SET key=? WHERE id=?", (key, num))
-            conn.commit()
-        elif ans.lower() == "back" or ans == "3":
+            change_keys()
+        elif ans == "3" or ans.lower() == "back":
             break
-        elif ans.lower() == "exit" or ans == "4":
+        elif ans == "4" or ans.lower() == "exit":
             raise SystemExit
         else:
             print("\n***INVALID SELECTION***")
@@ -126,6 +141,7 @@ def menu_settings(url):
         print("4) Back to main menu")
         print("5) Exit\n")
         ans = input(">>> ")
+        os.system("cls" if os.name == "nt" else "clear")
 
         # Define what the options do
         if ans == "1":
@@ -195,10 +211,11 @@ def menu_analysis(url):
         print("5) Back to main menu")
         print("6) Exit\n")
         ans = input(">>> ")
+        os.system("cls" if os.name == "nt" else "clear")
 
         # Define what the options do
         if ans == "1":
-            analysis.get_source(url)
+            analysis.get_source(url, cfg)
         elif ans == "2":
             scan_id = analysis.virustotal_submit(url, cur)
         elif ans == "3":
@@ -235,6 +252,7 @@ def menu_main():
         print("4) Manage API Keys")
         print("5) Exit\n")
         ans = input(">>> ")
+        os.system("cls" if os.name == "nt" else "clear")
 
         # Define what the options do
         if ans == "1":
@@ -277,6 +295,9 @@ if __name__ == "__main__":
     # parser.add_argument("URL", nargs="?", help="Provide the URL")
     # args = parser.parse_args()
 
+    # First, clear the screen
+    os.system("cls" if os.name == "nt" else "clear")
+
     # Load saved settings
     cfg = configparser.ConfigParser()
     cfg.optionxform = str
@@ -306,3 +327,13 @@ if __name__ == "__main__":
     conn.commit()
 
     menu_main()
+
+    # Features to implement...
+    # Settings:
+    #   Use the latest VirusTotal report if newer than X days (default 10)
+    #   Save history to a file (default False)
+    # Analysis:
+    #   Save page source to a file
+    #   Analyze multiple URLs at once
+    # API Keys:
+    #   Encrypt database file

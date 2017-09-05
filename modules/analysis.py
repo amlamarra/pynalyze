@@ -7,7 +7,7 @@ import requests
 vt_url = "https://www.virustotal.com/vtapi/v2/url/"
 
 
-def get_source(url):
+def get_source(url, cfg):
     """ Uses testuri.org to get the contents of a page.
     ACCEPTS: 1 string (the URL)
     RETURNS:
@@ -37,6 +37,8 @@ def get_source(url):
         redirect = turi_src[linum].split("</a><BR><B>")[0]
         redirect = redirect.split("'>")[1]
         print("Redirect URL: {}\n".format(redirect))
+        if cfg["Settings"]["FollowRedirects"] == "True":
+            print("Follow Redirects is set to TRUE")
 
     # Extract the page source
     source = r.text.split("<textarea>")[1]
