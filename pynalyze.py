@@ -4,7 +4,6 @@ AUTHOR: Andrew Lamarra
 """
 
 import os
-import time
 # import argparse
 import sqlite3
 import configparser
@@ -66,7 +65,7 @@ def list_keys():
         max_key_len = 3
 
     # Print it all out in a nicely formatted table
-    print(" +-{}-+-{}-+".format("-"*(max_name_len+3), "-"*max_key_len))
+    print("\n +-{}-+-{}-+".format("-"*(max_name_len+3), "-"*max_key_len))
     name_buff = " " * (max_name_len - 4)
     key_buff = " " * (max_key_len - 3)
     print(" | Service{} | Key{} |".format(name_buff, key_buff))
@@ -79,10 +78,9 @@ def list_keys():
 
 
 def change_keys():
-    # NO WAY TO ADD A NEW KEY, FIX THIS
     cur.execute("SELECT COUNT(*) FROM keys")
     rows = cur.fetchall()[0][0]
-    if len(rows) > 1:
+    if rows > 1:
         num = input("Which one? (1-{}, c to cancel) ".format(rows))
     else:
         num = input("Which one? (1, c to cancel) ".format(rows))
@@ -98,6 +96,7 @@ def change_keys():
 
 
 def menu_apikeys():
+    error = ""
     while True:
         print("\nAPI KEYS MENU")
         print("=============\n")
@@ -105,25 +104,29 @@ def menu_apikeys():
         print("2) Add/change/remove a key")
         print("3) Back to main menu")
         print("4) Exit\n")
+        print(error)
+        error = ""
         ans = input(">>> ")
-        os.system("cls" if os.name == "nt" else "clear")
 
         if ans == "1":
-            print()
+            os.system("cls" if os.name == "nt" else "clear")
             list_keys()
         elif ans == "2":
             change_keys()
+            os.system("cls" if os.name == "nt" else "clear")
+            list_keys()
         elif ans == "3" or ans.lower() == "back":
+            os.system("cls" if os.name == "nt" else "clear")
             break
         elif ans == "4" or ans.lower() == "exit":
             raise SystemExit
         else:
-            print("\n***INVALID SELECTION***")
-            time.sleep(1)
-            continue
+            error = "***INVALID SELECTION***"
+            os.system("cls" if os.name == "nt" else "clear")
 
 
 def menu_settings(url):
+    error = ""
     while True:
         rest_url = cfg["Settings"]["RestoreURL"]
         def_proto = cfg["Settings"]["DefaultProtocol"]
@@ -140,6 +143,8 @@ def menu_settings(url):
         print("   (currently = {})\n".format(follow_redir))
         print("4) Back to main menu")
         print("5) Exit\n")
+        print(error)
+        error = ""
         ans = input(">>> ")
         os.system("cls" if os.name == "nt" else "clear")
 
@@ -159,6 +164,7 @@ def menu_settings(url):
                     break
                 else:
                     print("Please enter 'y' (yes) or 'n' (no)")
+            os.system("cls" if os.name == "nt" else "clear")
         elif ans == "2":
             while True:
                 print("\n    1) HTTP")
@@ -172,6 +178,7 @@ def menu_settings(url):
                     break
                 else:
                     print("Please enter '1' or '2'")
+            os.system("cls" if os.name == "nt" else "clear")
         elif ans == "3":
             while True:
                 value = input("\nChange value from {} to {}? (Y/n) ".format(
@@ -184,13 +191,14 @@ def menu_settings(url):
                     break
                 else:
                     print("Please enter 'y' (yes) or 'n' (no)")
+            os.system("cls" if os.name == "nt" else "clear")
         elif ans.lower() == "back" or ans == "4":
+            os.system("cls" if os.name == "nt" else "clear")
             break
         elif ans.lower() == "exit" or ans == "5":
             raise SystemExit
         else:
-            print("\n***INVALID SELECTION***")
-            time.sleep(1)
+            error = "***INVALID SELECTION***"
             continue
 
         # Save the settings
@@ -200,6 +208,7 @@ def menu_settings(url):
 
 def menu_analysis(url):
     scan_id = ""
+    error = ""
     while True:
         print("\nANALYSIS MENU")
         print("=============\n")
@@ -210,29 +219,35 @@ def menu_analysis(url):
         print("4) Get IP location info")
         print("5) Back to main menu")
         print("6) Exit\n")
+        print(error)
+        error = ""
         ans = input(">>> ")
-        os.system("cls" if os.name == "nt" else "clear")
 
         # Define what the options do
         if ans == "1":
+            os.system("cls" if os.name == "nt" else "clear")
             analysis.get_source(url, cfg)
         elif ans == "2":
+            os.system("cls" if os.name == "nt" else "clear")
             scan_id = analysis.virustotal_submit(url, cur)
         elif ans == "3":
             if not scan_id:
-                print("\nYou need to submit the URL to VirusTotal first")
-                time.sleep(1)
+                error = "You need to submit the URL to VirusTotal first"
+                os.system("cls" if os.name == "nt" else "clear")
             else:
+                os.system("cls" if os.name == "nt" else "clear")
                 analysis.virustotal_retrieve(cur, scan_id)
         elif ans == "4":
+            os.system("cls" if os.name == "nt" else "clear")
             analysis.ipinfo(url, cur)
         elif ans.lower() == "back" or ans == "5":
+            os.system("cls" if os.name == "nt" else "clear")
             break
         elif ans.lower() == "exit" or ans == "6":
             raise SystemExit
         else:
-            print("\n***INVALID SELECTION***")
-            time.sleep(1)
+            error = "***INVALID SELECTION***"
+            os.system("cls" if os.name == "nt" else "clear")
 
 
 def menu_main():
@@ -242,6 +257,7 @@ def menu_main():
     except KeyError:
         url = ""
 
+    error = ""
     while True:
         print("\nMAIN MENU")
         print("=========\n")
@@ -251,27 +267,32 @@ def menu_main():
         print("3) Settings")
         print("4) Manage API Keys")
         print("5) Exit\n")
+        print(error)
+        error = ""
         ans = input(">>> ")
-        os.system("cls" if os.name == "nt" else "clear")
 
         # Define what the options do
         if ans == "1":
             url = set_url()
+            os.system("cls" if os.name == "nt" else "clear")
         elif ans == "2":
             if url == "":
-                print("\nYou must set a URL")
-                time.sleep(1)
+                error = "***You must set a URL***"
+                os.system("cls" if os.name == "nt" else "clear")
             else:
+                os.system("cls" if os.name == "nt" else "clear")
                 menu_analysis(url)
         elif ans == "3":
+            os.system("cls" if os.name == "nt" else "clear")
             menu_settings(url)
         elif ans == "4":
+            os.system("cls" if os.name == "nt" else "clear")
             menu_apikeys()
         elif ans == "5" or ans.lower() == "exit":
             raise SystemExit
         else:
-            print("\n***INVALID SELECTION***")
-            time.sleep(1)
+            error = "***INVALID SELECTION***"
+            os.system("cls" if os.name == "nt" else "clear")
 
 
 def is_sqlite3(filename):
@@ -329,6 +350,8 @@ if __name__ == "__main__":
     menu_main()
 
     # Features to implement...
+    # Main Menu:
+    #   Generate report from output thus far
     # Settings:
     #   Use the latest VirusTotal report if newer than X days (default 10)
     #   Save history to a file (default False)
