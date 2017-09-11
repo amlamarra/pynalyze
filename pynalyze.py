@@ -4,8 +4,8 @@ AUTHOR: Andrew Lamarra
 """
 
 import os
-# import argparse
 import sqlite3
+# import argparse
 import configparser
 import validators
 from modules import analysis
@@ -87,8 +87,7 @@ def change_keys():
     while not num.isdigit() or int(num) < 1 or int(num) > rows:
         if num == "c":
             break
-        num = input("Please enter a number from 1 to {} (c to cancel): "
-                    .format(rows))
+        num = input("Please enter a number from 1 to {} (c to cancel): ".format(rows))
     else:
         key = input("\nEnter the key (leave blank to remove it): ")
         cur.execute("UPDATE keys SET key=? WHERE id=?", (key, num))
@@ -139,7 +138,7 @@ def menu_settings(url):
         print("2) Set default protocol when not specified in the URL")
         print("   (currently = {})\n".format(def_proto))
         print("3) Automatically follow redirects when getting the page source")
-        print("   Each URL in the redirect will still be displayed to you.")
+        print("   Each URL in the redirect chain will still be displayed to you")
         print("   (currently = {})\n".format(follow_redir))
         print("4) Back to main menu")
         print("5) Exit\n")
@@ -184,8 +183,7 @@ def menu_settings(url):
                 value = input("\nChange value from {} to {}? (Y/n) ".format(
                     follow_redir, (follow_redir == "False"))).lower()
                 if value == "y" or value == "yes" or value == "":
-                    cfg["Settings"]["FollowRedirects"] = str(
-                        follow_redir == "False")
+                    cfg["Settings"]["FollowRedirects"] = str(follow_redir == "False")
                     break
                 elif value == "n" or value == "no":
                     break

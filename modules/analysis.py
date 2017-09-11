@@ -6,6 +6,23 @@ import requests
 
 vt_url = "https://www.virustotal.com/vtapi/v2/url/"
 
+HTML_CODES = {
+    "200": "OK",
+    "300": "Multiple Choices",
+    "301": "Moved Permanently",
+    "302": "Found",
+    "304": "Not Modified",
+    "307": "Temporary Redirect",
+    "400": "Bad Request",
+    "401": "Unauthorized",
+    "403": "Forbidden",
+    "404": "Not Found",
+    "410": "Gone",
+    "500": "Internal Server Error",
+    "501": "Not Implemented",
+    "503": "Service Unavailable",
+    "550": "Permission Denied"}
+
 
 def get_source(url, cfg):
     """ Uses testuri.org to get the contents of a page.
@@ -30,7 +47,7 @@ def get_source(url, cfg):
     status = turi_src[linum].lower().split("<b>status</b>: ")[1]
     status = status.split("<br><b>content-type</b>:")[0]
     status = status.split(" ")[1]
-    print("Status code: {}\n".format(status))
+    print("Status code: {} {}\n".format(status, HTML_CODES[status]))
 
     if "30" in status:
         # Get the redirect URL
