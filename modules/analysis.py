@@ -44,18 +44,19 @@ def get_source(url, cfg):
     header = "<h3>http response headers</h3>"
     line = [line for line in turi_src if header in line.lower()][0]
     linum = turi_src.index(line) + 1
-    status = turi_src[linum].lower().split("<b>status</b>: ")[1]
-    status = status.split("<br><b>content-type</b>:")[0]
-    status = status.split(" ")[1]
-    print("Status code: {} {}\n".format(status, HTML_CODES[status]))
+    status = turi_src[linum].lower().split("http/1.1 ")[1]
+    status = status.split("<br><b>")[0].title()
+    status_code = status.split(" ")[0]
+    print("Status: {}\nStatus code: {}\n".format(status, status_code))
 
-    if "30" in status:
+    if "30" in status_code:
         # Get the redirect URL
         redirect = turi_src[linum].split("</a><BR><B>")[0]
         redirect = redirect.split("'>")[1]
         print("Redirect URL: {}\n".format(redirect))
         if cfg["Settings"]["FollowRedirects"] == "True":
-            print("Follow Redirects is set to TRUE")
+            print("Follow Redirects is set to TRUE. Getting new page source...\n\n")
+            get_source(redirect, cfg)
 
     # Extract the page source
     source = r.text.split("<textarea>")[1]
