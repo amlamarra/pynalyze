@@ -1,3 +1,4 @@
+import os
 import html
 import socket
 import pprint
@@ -7,6 +8,41 @@ import requests
 vt_url = "https://www.virustotal.com/vtapi/v2/url/"
 
 
+def menu_source(source):
+    error = ""
+    while True:
+        print("\nPAGE SOURCE")
+        print("===========\n")
+        print("1) Save page source to a file")
+        print("2) Display page source to screen")
+        print("3) Cancel")
+        print("4) Exit\n")
+        print(error)
+        error = ""
+        ans = input(">>> ")
+
+        if ans == "1":
+            os.system("cls" if os.name == "nt" else "clear")
+            fname = input("Enter the file name: ")
+            with open(fname, "w") as f:
+                f.write(source)
+            print("Page source written to: {}/{}".format(os.getcwd(), fname))
+            break
+        elif ans == "2":
+            print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< BEGIN PAGE SOURCE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            print(source)
+            print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< END PAGE SOURCE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            break
+        elif ans == "3":
+            os.system("cls" if os.name == "nt" else "clear")
+            break
+        elif ans == "4":
+            raise SystemExit
+        else:
+            error = "***INVALID SELECTION***"
+            os.system("cls" if os.name == "nt" else "clear")
+
+
 def get_source(url, cfg):
     """ Uses testuri.org to get the contents of a page.
     ACCEPTS: 1 string (the URL); 1 dict (from configparser with saved settings)
@@ -14,7 +50,7 @@ def get_source(url, cfg):
 
     # Set the necessary HTTP headers & send the request to testuri.org
     payload = {"url": url, "http": "1.1", "agent": "2"}
-    r = requests.post("http://testuri.org/sniffer", data=payload)
+    r = requests.post("http://testuri.org/", data=payload)
 
     # Exit the function if something went wrong
     if r.status_code != requests.codes.ok:
@@ -26,29 +62,40 @@ def get_source(url, cfg):
     turi_src = r.text.split("\n")
 
     # Extract the status code
-    header = "<h3>http response headers</h3>"
-    line = [line for line in turi_src if header in line.lower()][0]
-    linum = turi_src.index(line) + 1
+    header = "\t<H3>HTTP Response Headers</H3>"
+    for line in turi_src:
+        if header == line:
+            status = line
+            break
+    else:
+        print("Nothing could be found at that URL")
+        return
+
+    # line = [line for line in turi_src if header in line][0]
+    linum = turi_src.index(status) + 1
     status = turi_src[linum].lower().split("http/1.1 ")[1]
     status = status.split("<br><b>")[0].title()
     status_code = status.split(" ")[0]
-    print("Status: {}\nStatus code: {}\n".format(status, status_code))
 
     # If this is a redirect, do more stuff
     if "30" in status_code:
         # Get the redirect URL
         redirect = turi_src[linum].split("</a><BR><B>")[0]
         redirect = redirect.split("'>")[1]
-        print("Redirect URL: {}\n".format(redirect))
+        print("This URL redirects to: {}\n".format(redirect))
         if cfg["Settings"]["FollowRedirects"] == "True":
-            print("Follow Redirects is set to TRUE. Getting new page source...\n\n")
+            print("Follow Redirects is set to TRUE. Getting new page source...")
             get_source(redirect, cfg)
+            return
+        else:
+            print("Follow Redirects is set to FALSE.")
 
     # Extract the page source
     source = r.text.split("<textarea>")[1]
     source = source.split("</textarea>")[0]
     source = html.unescape(source)
-    print(source)
+    # print(source)
+    menu_source(source)
 
 
 def virustotal_submit(url, cur):

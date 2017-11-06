@@ -1,4 +1,4 @@
 # pynalyze
-An analyzer to see if a URL is malicious
+A tool to help you analyze potentially malicious URLs
 
 Runs on Windows or Linux in Python 3

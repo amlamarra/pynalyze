@@ -211,37 +211,41 @@ def menu_analysis(url):
         print("\nANALYSIS MENU")
         print("=============\n")
         print("   URL to analyze: {}\n".format(url))
-        print("1) Get page source")
-        print("2) Submit to VirusTotal")
-        print("3) Retrieve VirusTotal report")
-        print("4) Get IP location info")
-        print("5) Back to main menu")
-        print("6) Exit\n")
+        print("1) Set/change URL")
+        print("2) Get page source")
+        print("3) Submit URL to VirusTotal")
+        print("4) Retrieve VirusTotal report")
+        print("5) Get IP location info")
+        print("6) Back to main menu")
+        print("7) Exit\n")
         print(error)
         error = ""
         ans = input(">>> ")
 
         # Define what the options do
         if ans == "1":
+            url = set_url()
             os.system("cls" if os.name == "nt" else "clear")
-            analysis.get_source(url, cfg)
         elif ans == "2":
             os.system("cls" if os.name == "nt" else "clear")
-            scan_id = analysis.virustotal_submit(url, cur)
+            analysis.get_source(url, cfg)
         elif ans == "3":
+            os.system("cls" if os.name == "nt" else "clear")
+            scan_id = analysis.virustotal_submit(url, cur)
+        elif ans == "4":
             if not scan_id:
                 error = "You need to submit the URL to VirusTotal first"
                 os.system("cls" if os.name == "nt" else "clear")
             else:
                 os.system("cls" if os.name == "nt" else "clear")
                 analysis.virustotal_retrieve(cur, scan_id)
-        elif ans == "4":
+        elif ans == "5":
             os.system("cls" if os.name == "nt" else "clear")
             analysis.ipinfo(url, cur)
-        elif ans.lower() == "back" or ans == "5":
+        elif ans.lower() == "back" or ans == "6":
             os.system("cls" if os.name == "nt" else "clear")
             break
-        elif ans.lower() == "exit" or ans == "6":
+        elif ans.lower() == "exit" or ans == "7":
             raise SystemExit
         else:
             error = "***INVALID SELECTION***"
@@ -259,34 +263,29 @@ def menu_main():
     while True:
         print("\nMAIN MENU")
         print("=========\n")
-        print("   URL to analyze: {}\n".format(url))
-        print("1) Set/change URL")
-        print("2) Analysis")
-        print("3) Settings")
-        print("4) Manage API Keys")
-        print("5) Exit\n")
+        print("1) Analysis")
+        print("2) Settings")
+        print("3) Manage API Keys")
+        print("4) Exit\n")
         print(error)
         error = ""
         ans = input(">>> ")
 
         # Define what the options do
         if ans == "1":
-            url = set_url()
-            os.system("cls" if os.name == "nt" else "clear")
-        elif ans == "2":
             if url == "":
                 error = "***You must set a URL***"
                 os.system("cls" if os.name == "nt" else "clear")
             else:
                 os.system("cls" if os.name == "nt" else "clear")
                 menu_analysis(url)
-        elif ans == "3":
+        elif ans == "2":
             os.system("cls" if os.name == "nt" else "clear")
             menu_settings(url)
-        elif ans == "4":
+        elif ans == "3":
             os.system("cls" if os.name == "nt" else "clear")
             menu_apikeys()
-        elif ans == "5" or ans.lower() == "exit":
+        elif ans == "4" or ans.lower() == "exit":
             raise SystemExit
         else:
             error = "***INVALID SELECTION***"
