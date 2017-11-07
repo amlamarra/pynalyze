@@ -11,6 +11,10 @@ import validators
 from modules import analysis
 
 
+def clear():
+    os.system("cls" if os.name == "nt" else "clear")
+
+
 def set_url():
     """Get the URL to analyze from the user"""
     while True:
@@ -124,7 +128,13 @@ def menu_apikeys():
             os.system("cls" if os.name == "nt" else "clear")
 
 
-def menu_settings(url):
+def menu_settings():
+    # Attempt to load the saved URL
+    try:
+        url = cfg["Main"]["URL"]
+    except KeyError:
+        url = ""
+
     error = ""
     while True:
         rest_url = cfg["Settings"]["RestoreURL"]
@@ -145,7 +155,7 @@ def menu_settings(url):
         print(error)
         error = ""
         ans = input(">>> ")
-        os.system("cls" if os.name == "nt" else "clear")
+        clear()
 
         # Define what the options do
         if ans == "1":
@@ -163,7 +173,7 @@ def menu_settings(url):
                     break
                 else:
                     print("Please enter 'y' (yes) or 'n' (no)")
-            os.system("cls" if os.name == "nt" else "clear")
+            clear()
         elif ans == "2":
             while True:
                 print("\n    1) HTTP")
@@ -177,7 +187,7 @@ def menu_settings(url):
                     break
                 else:
                     print("Please enter '1' or '2'")
-            os.system("cls" if os.name == "nt" else "clear")
+            clear()
         elif ans == "3":
             while True:
                 value = input("\nChange value from {} to {}? (Y/n) ".format(
@@ -189,9 +199,9 @@ def menu_settings(url):
                     break
                 else:
                     print("Please enter 'y' (yes) or 'n' (no)")
-            os.system("cls" if os.name == "nt" else "clear")
+            clear()
         elif ans.lower() == "back" or ans == "4":
-            os.system("cls" if os.name == "nt" else "clear")
+            clear()
             break
         elif ans.lower() == "exit" or ans == "5":
             raise SystemExit
@@ -204,7 +214,13 @@ def menu_settings(url):
             cfg.write(f)
 
 
-def menu_analysis(url):
+def menu_analysis():
+    # Attempt to load the saved URL
+    try:
+        url = cfg["Main"]["URL"]
+    except KeyError:
+        url = ""
+
     scan_id = ""
     error = ""
     while True:
@@ -212,12 +228,17 @@ def menu_analysis(url):
         print("=============\n")
         print("   URL to analyze: {}\n".format(url))
         print("1) Set/change URL")
-        print("2) Get page source")
-        print("3) Submit URL to VirusTotal")
-        print("4) Retrieve VirusTotal report")
-        print("5) Get IP location info")
-        print("6) Back to main menu")
-        print("7) Exit\n")
+        if url:
+            print("2) Get page source")
+            print("3) Submit URL to VirusTotal")
+            print("4) Retrieve VirusTotal report")
+            print("5) Get IP location info")
+            print("6) Back to main menu")
+            print("7) Exit\n")
+        else:
+            print("2) Back to main menu")
+            print("3) Exit\n")
+
         print(error)
         error = ""
         ans = input(">>> ")
@@ -225,45 +246,47 @@ def menu_analysis(url):
         # Define what the options do
         if ans == "1":
             url = set_url()
-            os.system("cls" if os.name == "nt" else "clear")
+            scan_id = ""
+            clear()
         elif ans == "2":
-            os.system("cls" if os.name == "nt" else "clear")
-            analysis.get_source(url, cfg)
-        elif ans == "3":
-            os.system("cls" if os.name == "nt" else "clear")
-            scan_id = analysis.virustotal_submit(url, cur)
-        elif ans == "4":
-            if not scan_id:
-                error = "You need to submit the URL to VirusTotal first"
-                os.system("cls" if os.name == "nt" else "clear")
+            if url:
+                clear()
+                analysis.get_source(url, cfg)
             else:
-                os.system("cls" if os.name == "nt" else "clear")
+                clear()
+                break
+        elif ans == "3":
+            if url:
+                clear()
+                scan_id = analysis.virustotal_submit(url, cur)
+            else:
+                raise SystemExit
+        elif ans == "4" and url:
+            if scan_id:
+                clear()
                 analysis.virustotal_retrieve(cur, scan_id)
-        elif ans == "5":
-            os.system("cls" if os.name == "nt" else "clear")
+            else:
+                error = "You need to submit the URL to VirusTotal first"
+                clear()
+        elif ans == "5" and url:
+            clear()
             analysis.ipinfo(url, cur)
-        elif ans.lower() == "back" or ans == "6":
-            os.system("cls" if os.name == "nt" else "clear")
+        elif ans.lower() == "back" or ans == "6" and url:
+            clear()
             break
-        elif ans.lower() == "exit" or ans == "7":
+        elif ans.lower() == "exit" or ans == "7" and url:
             raise SystemExit
         else:
             error = "***INVALID SELECTION***"
-            os.system("cls" if os.name == "nt" else "clear")
+            clear()
 
 
 def menu_main():
-    # Attempt to load the saved URL
-    try:
-        url = cfg["Main"]["URL"]
-    except KeyError:
-        url = ""
-
     error = ""
     while True:
         print("\nMAIN MENU")
         print("=========\n")
-        print("1) Analysis")
+        print("1) URL Analysis")
         print("2) Settings")
         print("3) Manage API Keys")
         print("4) Exit\n")
@@ -273,15 +296,11 @@ def menu_main():
 
         # Define what the options do
         if ans == "1":
-            if url == "":
-                error = "***You must set a URL***"
-                os.system("cls" if os.name == "nt" else "clear")
-            else:
-                os.system("cls" if os.name == "nt" else "clear")
-                menu_analysis(url)
+            os.system("cls" if os.name == "nt" else "clear")
+            menu_analysis()
         elif ans == "2":
             os.system("cls" if os.name == "nt" else "clear")
-            menu_settings(url)
+            menu_settings()
         elif ans == "3":
             os.system("cls" if os.name == "nt" else "clear")
             menu_apikeys()
@@ -293,7 +312,10 @@ def menu_main():
 
 
 def is_sqlite3(filename):
-    """Check to see if a file is a SQLite database"""
+    """ Check to see if a file is a SQLite database.
+    ACCEPTS: 1 string (the file name)
+    RETURNS: Boolean value """
+
     from os.path import isfile, getsize
 
     if not isfile(filename):

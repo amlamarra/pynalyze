@@ -29,9 +29,9 @@ def menu_source(source):
             print("Page source written to: {}/{}".format(os.getcwd(), fname))
             break
         elif ans == "2":
-            print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< BEGIN PAGE SOURCE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-            print(source)
-            print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< END PAGE SOURCE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            print("############################## BEGIN PAGE SOURCE ##############################")
+            print("\n" + source)
+            print("############################### END PAGE SOURCE ###############################")
             break
         elif ans == "3":
             os.system("cls" if os.name == "nt" else "clear")
@@ -50,7 +50,11 @@ def get_source(url, cfg):
 
     # Set the necessary HTTP headers & send the request to testuri.org
     payload = {"url": url, "http": "1.1", "agent": "2"}
-    r = requests.post("http://testuri.org/", data=payload)
+    try:
+        r = requests.post("http://testuri.org/", data=payload)
+    except requests.HTTPError:
+        print("Sorry, but the TestURI.org service seems to be unavailable right now.")
+        return
 
     # Exit the function if something went wrong
     if r.status_code != requests.codes.ok:
@@ -120,7 +124,7 @@ def virustotal_submit(url, cur):
     json = r.json()
     print(json["verbose_msg"])
     print("Scan date: {}".format(json["scan_date"]))
-    print("Response code: {}".format(json["response_code"]))
+    # print("Response code: {}".format(json["response_code"]))
 
     return json["scan_id"]
 
@@ -182,7 +186,12 @@ def ipinfo(url, cur):
 
     # Save the response (json format) and display
     json = r.json()
-    pprint.pprint(json)
+    print("City Name:   {}".format(json["cityName"]))
+    print("Region Name: {}".format(json["regionName"]))
+    print("Zip Code:    {}".format(json["zipCode"]))
+    print("Time Zone:   {}".format(json["timeZone"]))
+    print("Country:     {}".format(json["countryName"]))
+    print("IP address:  {}".format(json["ipAddress"]))
 
 
 # Just saving this in case I need it later
