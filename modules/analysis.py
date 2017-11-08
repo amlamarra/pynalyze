@@ -1,7 +1,6 @@
 import os
 import html
 import socket
-import pprint
 import time
 import requests
 
@@ -102,6 +101,10 @@ def get_source(url, cfg):
     menu_source(source)
 
 
+def extract_urls():
+    print("This ain't workin' yet...")
+
+
 def virustotal_submit(url, cur):
     """ Submits a URL to VirusTotal for scanning
     ACCEPTS: 1 string (the URL); 1 cursor object (to call the database)
@@ -145,7 +148,7 @@ def virustotal_retrieve(cur, scan_id):
     # Save the response (json format) and display
     json = r.json()
     print(json["verbose_msg"])
-    print("Response code: {}".format(json["response_code"]))
+    # print("Response code: {}".format(json["response_code"]))
     print("VirusTotal found {} positive result(s) out of {} scans".format(
         json["positives"], json["total"]))
 

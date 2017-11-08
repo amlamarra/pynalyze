@@ -230,11 +230,12 @@ def menu_analysis():
         print("1) Set/change URL")
         if url:
             print("2) Get page source")
-            print("3) Submit URL to VirusTotal")
-            print("4) Retrieve VirusTotal report")
-            print("5) Get IP location info")
-            print("6) Back to main menu")
-            print("7) Exit\n")
+            print("3) Extract URLs from page source (experimental)")
+            print("4) Submit URL to VirusTotal")
+            print("5) Retrieve VirusTotal report")
+            print("6) Get IP location info")
+            print("7) Back to main menu")
+            print("8) Exit\n")
         else:
             print("2) Back to main menu")
             print("3) Exit\n")
@@ -258,23 +259,26 @@ def menu_analysis():
         elif ans == "3":
             if url:
                 clear()
-                scan_id = analysis.virustotal_submit(url, cur)
+
             else:
                 raise SystemExit
-        elif ans == "4" and url:
+        elif ans == "4":
+            clear()
+            scan_id = analysis.virustotal_submit(url, cur)
+        elif ans == "5" and url:
             if scan_id:
                 clear()
                 analysis.virustotal_retrieve(cur, scan_id)
             else:
                 error = "You need to submit the URL to VirusTotal first"
                 clear()
-        elif ans == "5" and url:
+        elif ans == "6" and url:
             clear()
             analysis.ipinfo(url, cur)
-        elif ans.lower() == "back" or ans == "6" and url:
+        elif ans.lower() == "back" or ans == "7" and url:
             clear()
             break
-        elif ans.lower() == "exit" or ans == "7" and url:
+        elif ans.lower() == "exit" or ans == "8" and url:
             raise SystemExit
         else:
             error = "***INVALID SELECTION***"
@@ -369,13 +373,11 @@ if __name__ == "__main__":
     menu_main()
 
     # Features to implement...
-    # Main Menu:
-    #   Generate report from output thus far
     # Settings:
     #   Use the latest VirusTotal report if newer than X days (default 10)
     #   Save history to a file (default False)
     # Analysis:
-    #   Save page source to a file
-    #   Analyze multiple URLs at once
+    #   Extract URLs from page source
+    #   Analyze multiple URLs at once (maybe)
     # API Keys:
     #   Encrypt database file
