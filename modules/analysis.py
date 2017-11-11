@@ -103,6 +103,8 @@ def get_source(url, cfg):
 
 def extract_urls():
     print("This ain't workin' yet...")
+    # See this answer:
+    # https://stackoverflow.com/questions/6883049/regex-to-find-urls-in-string-in-python
 
 
 def virustotal_submit(url, cur):
